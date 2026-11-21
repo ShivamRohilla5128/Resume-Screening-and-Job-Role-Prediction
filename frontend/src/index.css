@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-surface text-ink antialiased; }
+  h1, h2, h3 {
+    @apply text-navy tracking-tight;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: color 180ms ease, text-shadow 180ms ease, transform 180ms ease;
+  }
+  h1:not(.text-white):hover, h2:not(.text-white):hover, h3:not(.text-white):hover,
+  h1:not(.text-white):focus-visible, h2:not(.text-white):focus-visible, h3:not(.text-white):focus-visible {
+    color: #1d4ed8;
+    text-shadow: 0 4px 14px rgba(37, 99, 235, .2);
+    transform: perspective(600px) translateY(-1px) translateZ(4px) rotateX(1.5deg);
+  }
+}
+@layer components {
+  .card { @apply bg-white rounded-2xl border border-slate-200/70 shadow-card; }
+  .card-hover { @apply transition-shadow duration-300 hover:shadow-lift; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply bg-brand text-white hover:bg-blue-700 active:scale-[.98]; }
+  .btn-navy { @apply bg-navy text-white hover:bg-slate-900 active:scale-[.98]; }
+  .btn-ghost { @apply bg-white text-ink border border-slate-200 hover:bg-slate-50; }
+  .btn-danger { @apply bg-white text-red-600 border border-red-200 hover:bg-red-50; }
+  .input { @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium; }
+}
+
+/* ---------- subtle 3D + micro-interactions (CSS only, no WebGL needed) ---------- */
+.doc3d { perspective: 800px; }
+.doc3d-inner { position: relative; transform-style: preserve-3d; transform: rotateY(-20deg) rotateX(8deg); animation: floaty 6s ease-in-out infinite; }
+.doc3d-inner.pop { animation: floaty 6s ease-in-out infinite, pop .5s ease-out 1; }
+.doc3d-page { position: relative; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 20px 40px -18px rgba(20,33,61,.35); overflow: hidden; }
+.doc3d-inner::before, .doc3d-inner::after { content: ""; position: absolute; inset: 0; border-radius: 12px; background: #e2e8f0; z-index: -1; }
+.doc3d-inner::before { transform: translateZ(-10px) translate(6px, 6px); }
+.doc3d-inner::after { transform: translateZ(-20px) translate(12px, 12px); background: #cbd5e1; }
+.scanline { position: absolute; left: 0; right: 0; height: 36px; top: -36px; background: linear-gradient(180deg, transparent, rgba(37,99,235,.22), transparent); border-bottom: 2px solid #2563EB; animation: scan 1.6s linear infinite; pointer-events: none; }
+.ai-glow { box-shadow: 0 0 0 0 rgba(37,99,235,.45); animation: glow 2.4s ease-out infinite; }
+.particle { position: absolute; bottom: -12px; border-radius: 9999px; background: #2563EB; opacity: 0; animation: drift linear infinite; pointer-events: none; }
+.skill-in { animation: skillIn .4s ease-out both; }
+
+@keyframes floaty { 0%, 100% { transform: translateY(0) rotateY(-20deg) rotateX(8deg); } 50% { transform: translateY(-10px) rotateY(-12deg) rotateX(5deg); } }
+@keyframes pop { 0% { scale: 1; } 40% { scale: 1.06; } 100% { scale: 1; } }
+@keyframes scan { from { top: -36px; } to { top: 100%; } }
+@keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(37,99,235,.4); } 70% { box-shadow: 0 0 0 14px rgba(37,99,235,0); } 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); } }
+@keyframes drift { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .35; } 100% { transform: translateY(-110vh); opacity: 0; } }
+@keyframes skillIn { from { opacity: 0; transform: translateY(6px) scale(.96); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .doc3d-inner { transform: rotateY(-12deg) rotateX(4deg) !important; }
+  .particle { display: none; }
+}

@@ -1,0 +1,10 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+frontend/dist/
+ml/artifacts/*.pkl
+ml/artifacts/metrics.json
+.DS_Store

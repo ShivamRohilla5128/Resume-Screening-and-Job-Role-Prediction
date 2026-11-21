@@ -1,0 +1,18 @@
+# Backend + ML (Python 3.10 - 3.12 recommended)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+pydantic>=2.6
+pymongo>=4.6
+PyJWT>=2.8
+python-dotenv>=1.0
+PyMuPDF>=1.24
+python-docx>=1.1
+reportlab>=4.1
+scikit-learn>=1.3
+pandas>=2.0
+numpy>=1.24
+joblib>=1.3
+# optional: zero-install in-memory database for demos/tests (set MONGO_URI=mongomock) + API tests
+mongomock>=4.1
+httpx>=0.27
