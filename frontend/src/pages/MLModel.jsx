@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Cpu, Gauge, Layers, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
 import { meta } from "../services/api";
-import { PageHeader, Section, Spinner } from "../components/ui";
+import { Section, Spinner } from "../components/ui";
 import { useToast } from "../hooks/useToast";
 import { errMsg } from "../utils/format";
 
@@ -51,20 +51,49 @@ export default function MLModel() {
     };
   });
   const summary = [
-    ["Model shown", modelName],
-    ["Test accuracy", percent(selected.accuracy)],
-    ["Training resumes", metrics.dataset.rows_used.toLocaleString()],
+    { label: "Inspecting model", value: modelName, helper: modelName === metrics.best_model ? "Training default" : "Comparison view only", Icon: Cpu, tone: "bg-blue-50 text-brand" },
+    { label: "Test accuracy", value: percent(selected.accuracy), helper: "Correct predictions on held-out resumes", Icon: Gauge, tone: "bg-emerald-50 text-emerald-700" },
+    { label: "Training data", value: metrics.dataset.rows_used.toLocaleString(), helper: `${metrics.dataset.n_classes} job roles`, Icon: Layers, tone: "bg-violet-50 text-violet-700" },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Model Overview" subtitle="A simple summary of how the resume role prediction model performs." />
+      <motion.header
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-navy via-[#1D356B] to-brand p-6 text-white shadow-lift sm:p-8"
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 h-64 w-64 rounded-full border-[30px] border-white/10" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-36 h-48 w-48 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="relative max-w-2xl">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-blue-100 ring-1 ring-inset ring-white/15">
+            <Cpu className="h-3.5 w-3.5" /> Model insights
+          </span>
+          <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">Model overview</h1>
+          <p className="mt-2 text-sm leading-relaxed text-blue-100/90 sm:text-base">
+            Compare model performance, explore role predictions, and inspect where each model gets it right.
+          </p>
+        </div>
+      </motion.header>
       <div className="grid gap-4 sm:grid-cols-3">
-        {summary.map(([label, value]) => (
-          <div key={label} className="card p-5">
-            <p className="text-sm text-slate-500">{label}</p>
-            <p className="mt-2 text-xl font-semibold text-navy">{value}</p>
-          </div>
+        {summary.map(({ label, value, helper, Icon, tone }, i) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08 }}
+            whileHover={{ y: -4 }}
+            className="card card-hover p-5"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm text-slate-500">{label}</p>
+                <p className="mt-2 truncate text-xl font-semibold text-navy">{value}</p>
+              </div>
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone}`}><Icon className="h-5 w-5" /></span>
+            </div>
+            <p className="mt-3 text-xs text-slate-500">{helper}</p>
+          </motion.div>
         ))}
       </div>
       <Section title="Model comparison">
@@ -72,15 +101,23 @@ export default function MLModel() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-xs text-slate-500">
-              <tr><th className="py-2">Model</th><th>Validation score</th><th>Test accuracy</th><th>Training default</th></tr>
+              <tr><th className="py-2">Model</th><th className="min-w-40">Validation score</th><th className="min-w-40">Test accuracy</th><th>Training default</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {Object.entries(metrics.models).map(([name, result]) => (
-                <tr key={name} className={name === modelName ? "bg-blue-50/50" : ""}>
-                  <td className="py-3 font-medium text-navy">{name}</td>
-                  <td>{percent(result.cv_f1_macro_mean)}</td>
-                  <td>{percent(result.accuracy)}</td>
-                  <td>{name === metrics.best_model ? <span className="chip bg-blue-50 text-brand">Default</span> : <span className="text-slate-400">—</span>}</td>
+                <tr key={name} className={`transition-colors hover:bg-slate-50 ${name === modelName ? "bg-blue-50/60" : ""}`}>
+                  <td className="py-3 pr-4 font-medium text-navy">{name}</td>
+                  {[result.cv_f1_macro_mean, result.accuracy].map((score, i) => (
+                    <td key={i} className="py-3 pr-5">
+                      <div className="flex items-center gap-3">
+                        <span className="w-12 shrink-0 tabular-nums">{percent(score)}</span>
+                        <div className="h-1.5 min-w-16 flex-1 overflow-hidden rounded-full bg-slate-100">
+                          <motion.div initial={{ width: 0 }} animate={{ width: percent(score) }} transition={{ duration: 1.4, delay: 0.1 }} className={`h-full rounded-full ${i === 0 ? "bg-blue-300" : "bg-brand"}`} />
+                        </div>
+                      </div>
+                    </td>
+                  ))}
+                  <td>{name === metrics.best_model ? <span className="chip bg-blue-50 text-brand">Default</span> : <span className="text-slate-300">—</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -112,7 +149,7 @@ export default function MLModel() {
         </div>
         <p className="mb-4 text-sm text-slate-500">Rows show the actual role; columns show the predicted role. Correct predictions are on the diagonal.</p>
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(400px,0.9fr)]">
-          <div className="min-w-0 overflow-x-auto pb-2">
+          <div className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 overflow-x-auto pb-2">
             <div
               role="grid"
               aria-label={`Prediction matrix for ${modelName}`}
@@ -133,7 +170,7 @@ export default function MLModel() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 1.4, delay: i * 0.1, ease: "easeInOut" }}
-                    className="grid h-7 w-7 place-items-center rounded text-[10px]"
+                    className="grid h-7 w-7 cursor-help place-items-center rounded text-[10px] transition-[filter,box-shadow] hover:z-10 hover:brightness-110 hover:shadow-md"
                     style={{
                       backgroundColor: i === j
                         ? `rgba(37, 99, 235, ${0.08 + 0.82 * count / maxCount})`
@@ -150,7 +187,7 @@ export default function MLModel() {
               {metrics.classes.map((role, i) => <p key={role}>{i + 1}. {role}</p>)}
             </div>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 rounded-2xl border border-slate-100 bg-gradient-to-b from-blue-50/70 to-white p-4">
             <h3 className="text-sm font-semibold">Accuracy radar</h3>
             <p className="mt-1 text-xs text-slate-500">Hover over any point for the role’s prediction details.</p>
             <div className="mt-3 h-[480px]">

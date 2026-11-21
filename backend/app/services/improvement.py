@@ -55,7 +55,13 @@ def review(text, info, target_role=None):
     role = get_role(target_role) if target_role else None
     if role:
         miss = [x for x in role["required"] if x not in info["skills"]]
-        if miss: tips.append(f"Skills commonly expected for {role['role']} that were not detected: {', '.join(miss)}. Add them only if you genuinely have them.")
+        required_count = len(role["required"])
+        matched_count = required_count - len(miss)
+        role_coverage = matched_count / required_count if required_count else 0
+        score = (score + role_coverage * 100) / 2
+        if miss:
+            issues.append(f"{matched_count} of {required_count} required skills detected for {role['role']}.")
+            tips.append(f"Skills commonly expected for {role['role']} that were not detected: {', '.join(miss)}. Add them only if you genuinely have them.")
     items.append(_item("skills", score, issues, tips))
 
     # education

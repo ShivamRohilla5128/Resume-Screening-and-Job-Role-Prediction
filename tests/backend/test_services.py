@@ -98,6 +98,15 @@ class GapAndImproveTests(unittest.TestCase):
         self.assertTrue(any("Responsible for" in w["original"] for w in r["wording_examples"]))
         self.assertTrue(0 <= r["overall"] <= 100)
 
+    def test_review_score_changes_with_target_role_skill_coverage(self):
+        data_analyst = improvement.review(RESUME, self.info, "Data Analyst")
+        devops = improvement.review(RESUME, self.info, "DevOps Engineer")
+        self.assertNotEqual(data_analyst["overall"], devops["overall"])
+        self.assertNotEqual(
+            next(s["score"] for s in data_analyst["sections"] if s["key"] == "skills"),
+            next(s["score"] for s in devops["sections"] if s["key"] == "skills"),
+        )
+
 
 class MatchingTests(unittest.TestCase):
     def test_score_orders_sensibly(self):

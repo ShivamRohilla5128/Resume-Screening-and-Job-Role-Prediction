@@ -4,6 +4,15 @@
 |---|---|---|
 | `skills_reference.csv` | Job_Role / Required_Skills / Optional_Skills for the 15 supported roles (hand-written reference used for skill-gap and matching; **not** training data) | curated reference |
 | `generate_synthetic_dataset.py` -> `resume_dataset_synthetic.csv` | 750 **synthetic** resumes (50 per role) generated from templates, for smoke-testing the pipeline | **SYNTHETIC** |
+| `resume_dataset_1500_synthetic.csv` | 1,500 template-generated resumes (100 per supported role), provided in the resume training pack | **SYNTHETIC** |
+
+Train with the included 1,500-resume dataset:
+
+```
+python -m ml.training.train --data ml/datasets/resume_dataset_1500_synthetic.csv --synthetic yes
+```
+
+These are synthetic resumes, so the resulting metrics are for demonstration only and do not represent real-world performance.
 
 ## Training on a real dataset (required for a meaningful lab result)
 

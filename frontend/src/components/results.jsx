@@ -102,7 +102,7 @@ export function ReviewResult({ r }) {
   return (
     <div className="space-y-5">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <TiltCard><div className="card flex justify-center p-6"><ProgressRing value={r.overall} size={150} stroke={12} label="Overall resume score (rule-based)" /></div></TiltCard>
+        <TiltCard><div className="card flex justify-center p-6"><ProgressRing value={r.overall} size={150} stroke={12} label="Role-aware resume score" /></div></TiltCard>
         <div className="grid gap-5 sm:grid-cols-2">
           <Section title="Strengths" icon={CheckCircle2}>{r.strengths.length ? <ul className="list-disc space-y-1 pl-5 text-sm">{r.strengths.map((s) => <li key={s}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">None detected yet</p>}</Section>
           <Section title="Weaknesses" icon={XCircle}>{r.weaknesses.length ? <ul className="list-disc space-y-1 pl-5 text-sm">{r.weaknesses.map((s) => <li key={s}>{s}</li>)}</ul> : <p className="text-sm text-slate-400">No major weaknesses</p>}</Section>

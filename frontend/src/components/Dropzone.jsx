@@ -31,9 +31,9 @@ export default function Dropzone({ files, setFiles, multiple = true, disabled = 
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && !disabled && input.current?.click()}
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
         onDrop={(e) => { e.preventDefault(); setDrag(false); if (!disabled) add(e.dataTransfer.files); }}
-        className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition ${drag ? "border-brand bg-blue-50" : "border-slate-300 bg-white hover:border-brand/60"} ${disabled ? "pointer-events-none opacity-60" : ""}`}>
-        <UploadCloud className="h-9 w-9 text-brand" />
-        <p className="text-sm font-medium">Drag &amp; drop {multiple ? "resumes" : "a resume"} here, or <span className="text-brand">browse</span></p>
+        className={`group flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition duration-200 ${drag ? "scale-[1.01] border-brand bg-blue-50 shadow-inner" : "border-blue-200/80 bg-gradient-to-br from-blue-50/70 via-white to-violet-50/50 hover:-translate-y-0.5 hover:border-brand/60 hover:shadow-card"} ${disabled ? "pointer-events-none opacity-60" : ""}`}>
+        <span className={`grid h-14 w-14 place-items-center rounded-2xl transition duration-200 ${drag ? "bg-brand text-white shadow-md" : "bg-white text-brand shadow-sm ring-1 ring-blue-100 group-hover:rotate-[-4deg] group-hover:scale-105"}`}><UploadCloud className="h-7 w-7" /></span>
+        <p className="mt-1 text-sm font-semibold text-navy">Drag &amp; drop {multiple ? "resumes" : "a resume"} here, or <span className="text-brand">browse</span></p>
         <p className="text-xs text-slate-500">PDF or DOCX · max 5 MB each{multiple ? " · up to 25 files" : ""}</p>
         <input ref={input} type="file" hidden accept=".pdf,.docx" multiple={multiple} onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
       </div>
