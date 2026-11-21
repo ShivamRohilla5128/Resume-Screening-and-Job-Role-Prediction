@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { RotateCcw, SlidersHorizontal } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
 import { meta } from "../services/api";
 import { PageHeader, Section, Spinner } from "../components/ui";
 import { useToast } from "../hooks/useToast";
 import { errMsg } from "../utils/format";
 
 const percent = (value) => `${(value * 100).toFixed(1)}%`;
+
+function RoleAccuracyTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const { role, accuracy, correct, total, errors } = payload[0].payload;
+  return (
+    <div className="card min-w-44 p-3 text-xs shadow-lift">
+      <p className="mb-1 font-semibold text-navy">{role}</p>
+      <p className="text-slate-600">Accuracy: <b>{accuracy.toFixed(1)}%</b></p>
+      <p className="text-slate-600">Correct: <b>{correct} of {total}</b></p>
+      <p className="text-slate-600">Incorrect: <b>{errors}</b></p>
+    </div>
+  );
+}
 
 export default function MLModel() {
   const [metrics, setMetrics] = useState(null);
@@ -28,7 +41,14 @@ export default function MLModel() {
   const maxCount = Math.max(1, ...matrix.flat());
   const roleAccuracy = matrix.map((row, i) => {
     const total = row.reduce((sum, count) => sum + count, 0);
-    return { role: metrics.classes[i], accuracy: total ? Number(((row[i] / total) * 100).toFixed(1)) : 0 };
+    const correct = row[i];
+    return {
+      role: metrics.classes[i],
+      accuracy: total ? Number(((correct / total) * 100).toFixed(1)) : 0,
+      correct,
+      total,
+      errors: total - correct,
+    };
   });
   const summary = [
     ["Model shown", modelName],
@@ -91,7 +111,7 @@ export default function MLModel() {
           </div>
         </div>
         <p className="mb-4 text-sm text-slate-500">Rows show the actual role; columns show the predicted role. Correct predictions are on the diagonal.</p>
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(400px,0.9fr)]">
           <div className="min-w-0 overflow-x-auto pb-2">
             <div
               role="grid"
@@ -131,17 +151,17 @@ export default function MLModel() {
             </div>
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold">Correct predictions by role</h3>
-            <p className="mt-1 text-xs text-slate-500">Percentage of resumes correctly identified for each actual role.</p>
-            <div className="mt-3 h-[510px]">
+            <h3 className="text-sm font-semibold">Accuracy radar</h3>
+            <p className="mt-1 text-xs text-slate-500">Hover over any point for the role’s prediction details.</p>
+            <div className="mt-3 h-[480px]">
               <ResponsiveContainer>
-                <BarChart data={roleAccuracy} layout="vertical" margin={{ left: 0, right: 12 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={10} />
-                  <YAxis type="category" dataKey="role" width={125} fontSize={9} interval={0} />
-                  <Tooltip formatter={(value) => [`${value}%`, "Correct"]} />
-                  <Bar dataKey="accuracy" fill="#2563EB" radius={[0, 4, 4, 0]} animationDuration={2200} animationEasing="ease-in-out" />
-                </BarChart>
+                <RadarChart data={roleAccuracy} outerRadius="82%">
+                  <PolarGrid stroke="#CBD5E1" />
+                  <PolarAngleAxis dataKey="role" tick={false} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 9 }} />
+                  <Radar dataKey="accuracy" name="Accuracy" stroke="#2563EB" strokeWidth={2} fill="#3B82F6" fillOpacity={0.28} dot={{ r: 4, fill: "#1D4ED8" }} activeDot={{ r: 7, fill: "#1D4ED8" }} animationDuration={2200} animationEasing="ease-in-out" />
+                  <Tooltip content={<RoleAccuracyTooltip />} />
+                </RadarChart>
               </ResponsiveContainer>
             </div>
           </div>
